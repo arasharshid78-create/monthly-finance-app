@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>حساب و کتاب ماهیانه</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1f7a5c">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f4; --card:#ffffff; --text:#1a2220; --muted:#7c8a86; --border:#e4e9e7;
+  --accent:#1f7a5c; --accent-bg:#e5f1ec; --gold:#b8862e; --gold-bg:#f7eddb;
+  --danger:#c1544b; --danger-bg:#fbeae8;
+  --grad1:#1f7a5c; --grad2:#124e3b;
+  box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1412; --card:#182220; --text:#eaf1ee; --muted:#8b9995; --border:#243330;
+    --accent:#3fcf9a; --accent-bg:#163229; --gold:#e0b954; --gold-bg:#2c2413;
+    --danger:#e2857c; --danger-bg:#33201d;
+    --grad1:#12352a; --grad2:#0a1e18;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1412; --card:#182220; --text:#eaf1ee; --muted:#8b9995; --border:#243330;
+  --accent:#3fcf9a; --accent-bg:#163229; --gold:#e0b954; --gold-bg:#2c2413;
+  --danger:#e2857c; --danger-bg:#33201d;
+  --grad1:#12352a; --grad2:#0a1e18;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Vazirmatn',Tahoma,sans-serif;font-size:15px;}
+header{position:sticky;top:0;padding:calc(18px + env(safe-area-inset-top,0px)) 18px 20px;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;z-index:5;border-radius:0 0 20px 20px;}
+header h1{margin:0;font-size:19px;font-weight:700;}
+header .sub{color:rgba(255,255,255,.75);font-size:13px;margin-top:3px;}
+main{padding:14px 14px 90px;max-width:520px;margin:0 auto;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.muted{color:var(--muted);font-size:13px;}
+.amount{font-weight:700;font-variant-numeric:tabular-nums;}
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.summary .card{margin-bottom:0;text-align:center;padding:14px 6px;}
+.summary .lbl{font-size:12px;color:var(--muted);}
+.summary .val{font-size:17px;font-weight:800;margin-top:5px;font-variant-numeric:tabular-nums;}
+.pos{color:var(--accent);} .neg{color:var(--danger);}
+h2.section{font-size:13px;color:var(--muted);margin:18px 4px 8px;font-weight:600;}
+input,select,button{font-family:inherit;font-size:14px;border-radius:11px;border:1px solid var(--border);padding:10px 11px;background:var(--bg);color:var(--text);width:100%;}
+button{background:var(--accent);color:#fff;border:none;font-weight:700;cursor:pointer;padding:11px;}
+button.small{width:auto;padding:6px 14px;font-size:13px;}
+.form-grid{display:grid;gap:9px;margin-bottom:10px;}
+.form-grid.two{grid-template-columns:1fr 1fr;}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr;}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;}
+.field{margin-bottom:2px;}
+.item{border-bottom:1px solid var(--border);padding:11px 0;}
+.item:last-child{border-bottom:none;}
+.badge{font-size:12px;padding:5px 12px;border-radius:20px;font-weight:700;}
+.badge.paid{background:var(--accent-bg);color:var(--accent);}
+.badge.unpaid{background:var(--gold-bg);color:var(--gold);}
+.months{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+.mchip{font-size:12px;padding:6px 10px;border-radius:9px;border:1px solid var(--border);cursor:pointer;user-select:none;font-variant-numeric:tabular-nums;}
+.mchip.paid{background:var(--accent-bg);color:var(--accent);border-color:var(--accent);}
+.mchip.current{outline:2px solid var(--gold);}
+.del{color:var(--danger);font-size:12px;cursor:pointer;background:none;width:auto;padding:2px 4px;border:none;font-weight:600;}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0px);z-index:10;}
+nav button{flex:1;background:none;color:var(--muted);border-radius:0;font-weight:700;padding:12px 4px;font-size:12px;border:none;}
+nav .ic{display:block;font-size:17px;margin-bottom:2px;}
+nav button.active{color:var(--accent);}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:22px 0;}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="pageTitle">خانه</h1>
+  <div class="sub" id="pageSub"></div>
+</header>
+<main id="content"></main>
+<nav>
+  <button data-tab="home"><span class="ic">🏠</span>خانه</button>
+  <button data-tab="installments"><span class="ic">📅</span>اقساط</button>
+  <button data-tab="expenses"><span class="ic">🧾</span>هزینه‌ها</button>
+  <button data-tab="income"><span class="ic">💰</span>درآمد</button>
+  <button data-tab="history"><span class="ic">🗂️</span>تاریخچه</button>
+</nav>
+<script>
+// ---------- Jalali calendar engine ----------
+const jMonths=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+function g2j(gy,gm,gd){
+  const g_d_m=[0,31,59,90,120,151,181,212,243,273,304,334];
+  let jy=(gy<=1600)?0:979;
+  gy-=(gy<=1600)?621:1600;
+  const gy2=(gm>2)?(gy+1):gy;
+  let days=365*gy+Math.floor((gy2+3)/4)-Math.floor((gy2+99)/100)+Math.floor((gy2+399)/400)-80+gd+g_d_m[gm-1];
+  jy+=33*Math.floor(days/12053); days%=12053;
+  jy+=4*Math.floor(days/1461); days%=1461;
+  if(days>365){ jy+=Math.floor((days-1)/365); days=(days-1)%365; }
+  let jm,jd;
+  if(days<186){ jm=1+Math.floor(days/31); jd=1+(days%31); }
+  else{ jm=7+Math.floor((days-186)/30); jd=1+((days-186)%30); }
+  return {jy,jm,jd};
+}
+function todayJalali(){ const d=new Date(); return g2j(d.getFullYear(), d.getMonth()+1, d.getDate()); }
+function jOff(y1,m1,y2,m2){ return (y2-y1)*12+(m2-m1); }
+function jAdd(y,m,n){ const t=m-1+n; const ny=y+Math.floor(t/12); const nm=(((t%12)+12)%12)+1; return {jy:ny,jm:nm}; }
+function jLabel(jy,jm){ return jMonths[jm-1]+' '+jy; }
+
+// ---------- state ----------
+const LS_KEY='fin_app_v2';
+function load(){try{const d=JSON.parse(localStorage.getItem(LS_KEY));if(d)return d;}catch(e){}return {installments:[],expenses:[],income:{salary:0,additions:[]}};}
+let state=load();
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fmt(n){return Math.round(Number(n||0)).toLocaleString('en-US');}
+function monthSelect(id,sel){ let h=`<select id="${id}">`; jMonths.forEach((m,i)=>{h+=`<option value="${i+1}" ${i+1===sel?'selected':''}>${m}</option>`}); return h+`</select>`; }
+function fmtNumInput(el){ let raw=el.value.replace(/[^\d]/g,''); el.value = raw? Number(raw).toLocaleString('en-US') : ''; }
+function numVal(id){ return parseFloat(document.getElementById(id).value.replace(/,/g,''))||0; }
+
+let activeTab='home';
+const content=document.getElementById('content');
+const titleEl=document.getElementById('pageTitle');
+const subEl=document.getElementById('pageSub');
+const titles={home:'خانه',installments:'اقساط',expenses:'هزینه‌ها',income:'درآمد',history:'تاریخچه'};
+
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click',()=>{activeTab=b.dataset.tab; render();});
+});
+
+function render(){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===activeTab));
+  titleEl.textContent=titles[activeTab];
+  const t=todayJalali();
+  subEl.textContent=jLabel(t.jy,t.jm);
+  if(activeTab==='home') renderHome();
+  else if(activeTab==='installments') renderInstallments();
+  else if(activeTab==='expenses') renderExpenses();
+  else if(activeTab==='income') renderIncome();
+  else if(activeTab==='history') renderHistory();
+}
+
+// ---------- HOME ----------
+function renderHome(){
+  const t=todayJalali();
+  let dueTotal=0, unpaidTotal=0;
+  const dueItems=[];
+  state.installments.forEach(ins=>{
+    const off=jOff(ins.jy,ins.jm,t.jy,t.jm);
+    if(off>=0 && off<ins.months){
+      const paid=!!ins.paid[off];
+      dueTotal+=ins.amount;
+      if(!paid) unpaidTotal+=ins.amount;
+      dueItems.push({ins,off,paid});
+    }
+  });
+  const expThisMonth=state.expenses.filter(e=>e.jy===t.jy&&e.jm===t.jm);
+  const expTotal=expThisMonth.reduce((s,e)=>s+e.amount,0);
+  const incAdd=state.income.additions.filter(a=>a.jy===t.jy&&a.jm===t.jm).reduce((s,a)=>s+a.amount,0);
+  const incomeTotal=(state.income.salary||0)+incAdd;
+  const net=incomeTotal-dueTotal-expTotal;
+
+  let h=`<div class="summary">
+    <div class="card"><div class="lbl">درآمد این ماه</div><div class="val pos">${fmt(incomeTotal)}</div></div>
+    <div class="card"><div class="lbl">هزینه‌های آزاد</div><div class="val">${fmt(expTotal)}</div></div>
+    <div class="card"><div class="lbl">اقساط این ماه</div><div class="val">${fmt(dueTotal)}</div></div>
+    <div class="card"><div class="lbl">مانده حساب</div><div class="val ${net>=0?'pos':'neg'}">${fmt(net)}</div></div>
+  </div>`;
+
+  h+=`<h2 class="section">اقساط این ماه ${unpaidTotal>0?'· مانده پرداخت: '+fmt(unpaidTotal):''}</h2>`;
+  if(dueItems.length===0){ h+=`<div class="empty">قسطی برای این ماه ثبت نشده</div>`; }
+  else{
+    h+=`<div class="card">`;
+    dueItems.forEach(({ins,off,paid})=>{
+      h+=`<div class="item row">
+        <div><div>${ins.name}</div><div class="muted">${fmt(ins.amount)} تومان</div></div>
+        <div class="badge ${paid?'paid':'unpaid'}" style="cursor:pointer;" onclick="togglePaid('${ins.id}',${off})">
+          ${paid?'پرداخت شده':'پرداخت نشده'}
+        </div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  content.innerHTML=h;
+}
+function togglePaid(id,off){
+  const ins=state.installments.find(i=>i.id===id);
+  if(!ins)return;
+  ins.paid[off]=!ins.paid[off];
+  save(); render();
+}
+
+// ---------- INSTALLMENTS ----------
+function renderInstallments(){
+  const t=todayJalali();
+  let h=`<div class="card">
+    <div class="form-grid">
+      <div class="field"><label>نام قسط</label><input id="insName" placeholder="مثلا وام بانک"></div>
+      <div class="field"><label>مبلغ ماهیانه (تومان)</label><input id="insAmount" inputmode="numeric" oninput="fmtNumInput(this)" placeholder="مثلا 2,000,000"></div>
+      <div class="form-grid three">
+        <div class="field"><label>سال شروع</label><input id="insYear" type="number" value="${t.jy}"></div>
+        <div class="field"><label>ماه شروع</label>${monthSelect('insMonth',t.jm)}</div>
+        <div class="field"><label>تعداد ماه</label><input id="insMonths" type="number" placeholder="مثلا 24"></div>
+      </div>
+    </div>
+    <button onclick="addInstallment()">افزودن قسط</button>
+  </div>`;
+
+  if(state.installments.length===0){ h+=`<div class="empty">هنوز قسطی ثبت نشده</div>`; }
+  state.installments.forEach(ins=>{
+    const curOff=jOff(ins.jy,ins.jm,t.jy,t.jm);
+    const paidCount=Object.values(ins.paid).filter(Boolean).length;
+    h+=`<div class="card">
+      <div class="row"><div><b>${ins.name}</b><div class="muted">${fmt(ins.amount)} تومان × ${ins.months} ماه</div></div>
+      <button class="del" onclick="delInstallment('${ins.id}')">حذف</button></div>
+      <div class="muted" style="margin-top:6px;">پرداخت شده: ${paidCount} از ${ins.months}</div>
+      <div class="months">`;
+    for(let i=0;i<ins.months;i++){
+      const m=jAdd(ins.jy,ins.jm,i);
+      const paid=!!ins.paid[i];
+      h+=`<div class="mchip ${paid?'paid':''} ${i===curOff?'current':''}" onclick="togglePaid('${ins.id}',${i})">${jLabel(m.jy,m.jm)}</div>`;
+    }
+    h+=`</div></div>`;
+  });
+  content.innerHTML=h;
+}
+function addInstallment(){
+  const name=document.getElementById('insName').value.trim();
+  const amount=numVal('insAmount');
+  const jy=parseInt(document.getElementById('insYear').value);
+  const jm=parseInt(document.getElementById('insMonth').value);
+  const months=parseInt(document.getElementById('insMonths').value);
+  if(!name||!amount||!jy||!months) return alert('همه فیلدها را پر کنید');
+  state.installments.push({id:uid(),name,amount,jy,jm,months,paid:{}});
+  save(); renderInstallments();
+}
+function delInstallment(id){
+  if(!confirm('این قسط حذف شود؟'))return;
+  state.installments=state.installments.filter(i=>i.id!==id);
+  save(); renderInstallments();
+}
+
+// ---------- EXPENSES ----------
+function renderExpenses(){
+  const t=todayJalali();
+  let h=`<div class="card">
+    <div class="form-grid">
+      <div class="field"><label>عنوان خرید</label><input id="expDesc" placeholder="مثلا کفش"></div>
+      <div class="field"><label>مبلغ (تومان)</label><input id="expAmount" inputmode="numeric" oninput="fmtNumInput(this)" placeholder="مثلا 500,000"></div>
+      <div class="form-grid three">
+        <div class="field"><label>سال</label><input id="expYear" type="number" value="${t.jy}"></div>
+        <div class="field"><label>ماه</label>${monthSelect('expMonth',t.jm)}</div>
+        <div class="field"><label>روز</label><input id="expDay" type="number" min="1" max="31" value="${t.jd}"></div>
+      </div>
+    </div>
+    <button onclick="addExpense()">افزودن هزینه</button>
+  </div>`;
+  const sorted=[...state.expenses].sort((a,b)=>(b.jy*372+b.jm*31+b.jd)-(a.jy*372+a.jm*31+a.jd));
+  if(sorted.length===0){ h+=`<div class="empty">هنوز هزینه‌ای ثبت نشده</div>`; }
+  else{
+    h+=`<div class="card">`;
+    sorted.forEach(e=>{
+      h+=`<div class="item row">
+        <div><div>${e.desc}</div><div class="muted">${e.jd} ${jMonths[e.jm-1]} ${e.jy}</div></div>
+        <div class="row" style="gap:10px;"><span class="amount">${fmt(e.amount)}</span>
+        <button class="del" onclick="delExpense('${e.id}')">حذف</button></div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  content.innerHTML=h;
+}
+function addExpense(){
+  const desc=document.getElementById('expDesc').value.trim();
+  const amount=numVal('expAmount');
+  const jy=parseInt(document.getElementById('expYear').value);
+  const jm=parseInt(document.getElementById('expMonth').value);
+  const jd=parseInt(document.getElementById('expDay').value);
+  if(!desc||!amount||!jy||!jd) return alert('همه فیلدها را پر کنید');
+  state.expenses.push({id:uid(),desc,amount,jy,jm,jd});
+  save(); renderExpenses();
+}
+function delExpense(id){
+  state.expenses=state.expenses.filter(e=>e.id!==id);
+  save(); renderExpenses();
+}
+
+// ---------- INCOME ----------
+function renderIncome(){
+  const t=todayJalali();
+  let h=`<div class="card">
+    <div class="field"><label>حقوق ثابت ماهیانه (تومان)</label><input id="salaryInput" inputmode="numeric" oninput="fmtNumInput(this)" value="${state.income.salary?fmt(state.income.salary):''}" placeholder="مثلا 15,000,000"></div>
+    <button onclick="saveSalary()">ذخیره حقوق</button>
+  </div>`;
+  h+=`<div class="card">
+    <div class="form-grid">
+      <div class="field"><label>عنوان</label><input id="addDesc" placeholder="مثلا اضافه‌کاری"></div>
+      <div class="field"><label>مبلغ (تومان)</label><input id="addAmount" inputmode="numeric" oninput="fmtNumInput(this)" placeholder="تومان"></div>
+      <div class="form-grid two">
+        <div class="field"><label>سال</label><input id="addYear" type="number" value="${t.jy}"></div>
+        <div class="field"><label>ماه</label>${monthSelect('addMonth',t.jm)}</div>
+      </div>
+    </div>
+    <button onclick="addIncomeAddition()">افزودن</button>
+  </div>`;
+  const sorted=[...state.income.additions].sort((a,b)=>(b.jy*12+b.jm)-(a.jy*12+a.jm));
+  if(sorted.length){
+    h+=`<h2 class="section">درآمدهای اضافه</h2><div class="card">`;
+    sorted.forEach(a=>{
+      h+=`<div class="item row">
+        <div><div>${a.desc}</div><div class="muted">${jLabel(a.jy,a.jm)}</div></div>
+        <div class="row" style="gap:10px;"><span class="amount">${fmt(a.amount)}</span>
+        <button class="del" onclick="delAddition('${a.id}')">حذف</button></div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  content.innerHTML=h;
+}
+function saveSalary(){
+  state.income.salary=numVal('salaryInput');
+  save(); renderIncome();
+}
+function addIncomeAddition(){
+  const desc=document.getElementById('addDesc').value.trim();
+  const amount=numVal('addAmount');
+  const jy=parseInt(document.getElementById('addYear').value);
+  const jm=parseInt(document.getElementById('addMonth').value);
+  if(!desc||!amount||!jy) return alert('همه فیلدها را پر کنید');
+  state.income.additions.push({id:uid(),desc,amount,jy,jm});
+  save(); renderIncome();
+}
+function delAddition(id){
+  state.income.additions=state.income.additions.filter(a=>a.id!==id);
+  save(); renderIncome();
+}
+
+// ---------- HISTORY ----------
+let histJY=null, histJM=null, histPickerOpen=false;
+function renderHistory(){
+  const t=todayJalali();
+  if(histJY===null){ histJY=t.jy; histJM=t.jm; }
+
+  let dueTotal=0, unpaidTotal=0;
+  const dueItems=[];
+  state.installments.forEach(ins=>{
+    const off=jOff(ins.jy,ins.jm,histJY,histJM);
+    if(off>=0 && off<ins.months){
+      const paid=!!ins.paid[off];
+      dueTotal+=ins.amount; if(!paid) unpaidTotal+=ins.amount;
+      dueItems.push({ins,off,paid});
+    }
+  });
+  const exps=state.expenses.filter(e=>e.jy===histJY&&e.jm===histJM).sort((a,b)=>b.jd-a.jd);
+  const expTotal=exps.reduce((s,e)=>s+e.amount,0);
+  const adds=state.income.additions.filter(a=>a.jy===histJY&&a.jm===histJM);
+  const incAdd=adds.reduce((s,a)=>s+a.amount,0);
+  const incomeTotal=(state.income.salary||0)+incAdd;
+  const net=incomeTotal-dueTotal-expTotal;
+  const isFuture=(histJY>t.jy)||(histJY===t.jy&&histJM>t.jm);
+
+  let h=`<div class="card">
+    <div class="row" style="gap:8px;">
+      <button class="small" onclick="histShift(-1)">&#8592; ماه قبل</button>
+      <div style="text-align:center;flex:1;font-weight:700;cursor:pointer;text-decoration:underline dotted;" onclick="toggleHistPicker()">${jLabel(histJY,histJM)} 📅</div>
+      <button class="small" onclick="histShift(1)">ماه بعد &#8594;</button>
+    </div>
+  </div>`;
+  if(histPickerOpen){
+    h+=`<div class="card">
+      <div class="form-grid two">
+        <div class="field"><label>سال</label><input id="histYearPick" type="number" value="${histJY}"></div>
+        <div class="field"><label>ماه</label>${monthSelect('histMonthPick',histJM)}</div>
+      </div>
+      <div class="row" style="gap:8px;">
+        <button onclick="histJump()">برو به این ماه</button>
+        <button class="small" style="background:var(--bg);color:var(--text);border:1px solid var(--border);" onclick="histGoToday()">ماه جاری</button>
+      </div>
+    </div>`;
+  }
+
+  if(isFuture && dueItems.length===0 && exps.length===0 && adds.length===0 && !(state.income.salary)){
+    h+=`<div class="empty">هنوز اطلاعاتی برای این ماه ثبت نشده</div>`;
+    content.innerHTML=h; return;
+  }
+
+  h+=`<div class="summary">
+    <div class="card"><div class="lbl">درآمد</div><div class="val pos">${fmt(incomeTotal)}</div></div>
+    <div class="card"><div class="lbl">هزینه‌های آزاد</div><div class="val">${fmt(expTotal)}</div></div>
+    <div class="card"><div class="lbl">اقساط</div><div class="val">${fmt(dueTotal)}</div></div>
+    <div class="card"><div class="lbl">مانده حساب</div><div class="val ${net>=0?'pos':'neg'}">${fmt(net)}</div></div>
+  </div>`;
+
+  h+=`<h2 class="section">اقساط ${unpaidTotal>0?'· مانده: '+fmt(unpaidTotal):''}</h2>`;
+  if(dueItems.length===0){ h+=`<div class="empty">قسطی برای این ماه نیست</div>`; }
+  else{
+    h+=`<div class="card">`;
+    dueItems.forEach(({ins,off,paid})=>{
+      h+=`<div class="item row">
+        <div><div>${ins.name}</div><div class="muted">${fmt(ins.amount)} تومان</div></div>
+        <div class="badge ${paid?'paid':'unpaid'}">${paid?'پرداخت شده':'پرداخت نشده'}</div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+
+  h+=`<h2 class="section">هزینه‌ها</h2>`;
+  if(exps.length===0){ h+=`<div class="empty">هزینه‌ای ثبت نشده</div>`; }
+  else{
+    h+=`<div class="card">`;
+    exps.forEach(e=>{
+      h+=`<div class="item row"><div><div>${e.desc}</div><div class="muted">${e.jd} ${jMonths[e.jm-1]}</div></div><span class="amount">${fmt(e.amount)}</span></div>`;
+    });
+    h+=`</div>`;
+  }
+
+  if(adds.length){
+    h+=`<h2 class="section">درآمد اضافه</h2><div class="card">`;
+    adds.forEach(a=>{
+      h+=`<div class="item row"><div>${a.desc}</div><span class="amount">${fmt(a.amount)}</span></div>`;
+    });
+    h+=`</div>`;
+  }
+  content.innerHTML=h;
+}
+function histShift(n){
+  const m=jAdd(histJY,histJM,n);
+  histJY=m.jy; histJM=m.jm;
+  renderHistory();
+}
+function toggleHistPicker(){ histPickerOpen=!histPickerOpen; renderHistory(); }
+function histJump(){
+  histJY=parseInt(document.getElementById('histYearPick').value)||histJY;
+  histJM=parseInt(document.getElementById('histMonthPick').value)||histJM;
+  histPickerOpen=false;
+  renderHistory();
+}
+function histGoToday(){
+  const t=todayJalali(); histJY=t.jy; histJM=t.jm; histPickerOpen=false;
+  renderHistory();
+}
+
+render();
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js').catch(()=>{});});
+}
+</script>
+</body>
+</html>
